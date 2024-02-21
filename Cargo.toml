@@ -1,6 +1,6 @@
 [package]
 name = "ff-carl"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MPL-2.0"
 description = """
@@ -9,7 +9,7 @@ A simple utility library to automate Firefox' mTLS host:certificate assignment (
 repository = "https://github.com/andrewoswald/ff-carl"
 readme = "README.md"
 keywords = ["firefox", "mtls", "pkcs11", "certificate", "x509"]
-categories = ["firefox-automation", "firefox-administration"]
+categories = ["Authentication", "Configuration", "Filesystem"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

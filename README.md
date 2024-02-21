@@ -16,7 +16,7 @@ Pull in the lib using your Cargo.toml file:
 
 ```toml
 [dependencies]
-ff-carl = "0.1.0"
+ff-carl = "0.1.1"
 ```
 And run an example (being sure to appropriately substitute filesystem paths):
 

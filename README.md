@@ -32,7 +32,7 @@ fn main() -> Result<(), std::io::Error> {
          "mtls.cert-demo.com", // ascii_host
          443, // port
          "cert-demo.com", // base_domain
-         der_cert.as_bytes(), // DER cert byte array
+         der_cert.as_ref(), // DER cert byte array
      );
 
      let backing_path = PathBuf::from("/path/to/firefox/profile/ClientAuthRememberList.bin");

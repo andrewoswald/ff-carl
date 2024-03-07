@@ -100,19 +100,16 @@ impl<'a> EntryArgs<'a> {
         // However, we can simply make use of the x509-parser crate:
         let res = X509Certificate::from_der(der_cert);
 
-        // Firefox will default to 443 for https and 80 for http
-        // (although I can't imagine mTLS over http??)
-        let port = match port {
-            80 => None,
-            443 => None,
-            p => Some(p.to_string()),
-        };
-
         match res {
             Ok((_rem, cert)) => EntryArgs {
                 scheme: scheme.as_bytes(),
                 ascii_host: ascii_host.as_bytes(),
-                port,
+                port: match port {
+                    // Firefox will default to 443 for https and 80 for http
+                    // (although I can't imagine mTLS over http??)
+                    80 | 443 => None,
+                    p => Some(p.to_string()),
+                },
                 base_domain: base_domain.as_bytes(),
                 cert,
             },

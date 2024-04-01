@@ -88,7 +88,7 @@ impl<'a> EntryArgs<'a> {
         port: u32,
         base_domain: &'a str,
         der_cert: &'a [u8],
-    ) -> EntryArgs<'a> {
+    ) -> Self {
         // DER is very simple to parse; we've got a composition of:
         // * tags that distinguish types
         // * data length
@@ -135,7 +135,7 @@ pub fn write_entries(
 
     let mut backing_file = OpenOptions::new()
         .write(true)
-        .create(true)
+        .truncate(true)
         .open(backing_path)?;
 
     let necessary_len = (entry_inputs.len() * SLOT_LENGTH) as u64;
@@ -158,7 +158,7 @@ pub fn write_entries(
         // =========================== ENTRY KEY DETAILS ============================
         // --------------------------------------------------------------------------
         // Entry key c++ reference code is at nsClientAuthRemember::GetEntryKey;
-        // its contents consiste of:
+        // its contents consist of:
         // * The ascii host.
         // * ",,".
         // * An `OriginAttributes` suffix (c++ reference code is at OriginAttributes::CreateSuffix).

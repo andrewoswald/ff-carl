@@ -52,8 +52,7 @@ use std::fs::OpenOptions;
 use std::io::{Seek, SeekFrom, Write};
 use std::path::PathBuf;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use x509_parser::nom::AsBytes;
-use x509_parser::prelude::*;
+use x509_parser::{nom::AsBytes, prelude::*};
 
 /// The unambiguous, requisite host and DER certificate details used for creating ClientAuthRememberList *Entry* values.
 pub struct EntryArgs<'a> {
@@ -61,9 +60,9 @@ pub struct EntryArgs<'a> {
     scheme: &'a [u8],
     /// ASCII host; for example: "my.example.com".
     ascii_host: &'a [u8],
-    /// port; for example: Option(8443)
+    /// port; for example: Some(8443.to_string())
     port: Option<String>,
-    /// Base domain; for example (assuming `ascii_host` is `my.example.com`): "example.com".
+    /// Base domain; for example: "example.com".
     base_domain: &'a [u8],
     /// X509 certificate to associate for mTLS with the above host.
     cert: X509Certificate<'a>,
@@ -106,7 +105,6 @@ impl<'a> EntryArgs<'a> {
                 ascii_host: ascii_host.as_bytes(),
                 port: match port {
                     // Firefox will default to 443 for https and 80 for http
-                    // (although I can't imagine mTLS over http??)
                     80 | 443 => None,
                     p => Some(p.to_string()),
                 },

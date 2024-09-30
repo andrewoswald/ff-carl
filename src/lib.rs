@@ -69,8 +69,8 @@ pub struct EntryArgs<'a> {
 }
 
 impl<'a> EntryArgs<'a> {
-    /// Construct a new EntryArgs.  This will panic if the `der_cert` is not of DER format
-    /// or if there are any certificate parsing issues.
+    /// Construct a new EntryArgs.  This will issue an io::Error if the `der_cert`
+    /// is not of DER format or if there are any certificate parsing issues.
     /// #### Example
     /// ```
     /// let entry_args = ff_carl::EntryArgs::new(

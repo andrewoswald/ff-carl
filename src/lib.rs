@@ -14,8 +14,8 @@
 //! io::Error if not DER, if the certificate is corrupt, or due to other unanticipated i/o issues.
 //!
 //! [policy-templates]: https://mozilla.github.io/policy-templates/
-//! [certificates-install]: https://mozilla.github.io/policy-templates/#policiesjson-15
-//! [security-devices]: https://mozilla.github.io/policy-templates/#policiesjson-89
+//! [certificates-install]: https://mozilla.github.io/policy-templates/#certificates--install
+//! [security-devices]: https://mozilla.github.io/policy-templates/#securitydevices
 //!
 //! #### Example
 //!

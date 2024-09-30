@@ -16,8 +16,13 @@ Pull in the lib using your Cargo.toml file:
 
 ```toml
 [dependencies]
-ff-carl = "0.1.2"
+ff-carl = "1.0.0"
 ```
+Or simply
+```terminal
+cargo add ff-carl
+```
+
 And run an example (being sure to appropriately substitute filesystem paths):
 
 ```rust,no_run

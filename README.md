@@ -16,7 +16,7 @@ Pull in the lib using your Cargo.toml file:
 
 ```toml
 [dependencies]
-ff-carl = "1.0.1"
+ff-carl = "1.0.2"
 ```
 Or simply
 ```terminal

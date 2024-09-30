@@ -5,18 +5,18 @@ A utility library for automating Firefox' mTLS host:certificate preference assig
 ## Overview
 This should be paired with `policies.json` certificate configuration management as per Firefox
 [policy-templates](https://mozilla.github.io/policy-templates/), particularly a
-[Certificates -> Install](https://mozilla.github.io/policy-templates/#certificates--install) stanza for *filesystem* resident
-certs and/or a [SecurityDevices](https://mozilla.github.io/policy-templates/#securitydevices) stanza for *PKCS#11* resident
+[Certificates -> Install](https://mozilla.github.io/policy-templates/#policiesjson-15) stanza for *filesystem* resident
+certs and/or a [SecurityDevices](https://mozilla.github.io/policy-templates/#policiesjson-89) stanza for *PKCS#11* resident
 certs.
 
-For its *configuration*, FF-CARL currently requires x509 client certificates to be in **DER** format.  The library will panic if the certificate bytes are not that of DER encoding, or if the DER certificate is otherwise unable to be parsed.  Please be aware that the DER certificate being used for configuration doesn't need to be the *very same* certificate known to Firefox, just a DER encoded version of it!
+For its *configuration*, FF-CARL currently requires x509 client certificates to be in **DER** format.  The library will issue an io::Error if the certificate bytes are not that of DER encoding, or if the DER certificate is otherwise unable to be parsed.  Please be aware that the DER certificate being used for configuration doesn't need to be the *very same* certificate known to Firefox, just a DER encoded version of it!
 
 ## Example
 Pull in the lib using your Cargo.toml file:
 
 ```toml
 [dependencies]
-ff-carl = "0.1.1"
+ff-carl = "0.1.2"
 ```
 And run an example (being sure to appropriately substitute filesystem paths):
 
@@ -26,7 +26,7 @@ use ff_carl::EntryArgs;
 use std::path::PathBuf;
 
 fn main() -> Result<(), std::io::Error> {
-     let der_cert = std::fs::read("/path/to/cert.der").unwrap();
+     let der_cert = std::fs::read("/path/to/cert.der").expect("Failed to read certificate.");
      let entry_args = EntryArgs::new(
          "https", // scheme
          "mtls.cert-demo.com", // ascii_host

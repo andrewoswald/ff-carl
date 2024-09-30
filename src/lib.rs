@@ -10,8 +10,8 @@
 //! file, and specifically through a [Certificates -> Install][certificates-install] stanza (for filesystem resident
 //! certs) and/or a [SecurityDevices][security-devices] stanza (for PKCS#11 resident certs).
 //!
-//! FF-CARL currently requires client x509 certificate \[u8\] to be in **DER** format.  The library will panic if not DER,
-//! if the certificate is corrupt, or due to other unanticipated i/o issues.
+//! FF-CARL currently requires client x509 certificate \[u8\] to be in **DER** format.  The library will issue an
+//! io::Error if not DER, if the certificate is corrupt, or due to other unanticipated i/o issues.
 //!
 //! [policy-templates]: https://mozilla.github.io/policy-templates/
 //! [certificates-install]: https://mozilla.github.io/policy-templates/#policiesjson-15
@@ -26,7 +26,7 @@
 //! use std::path::PathBuf;
 //!
 //! fn main() -> Result<(), std::io::Error> {
-//!     let der_cert = std::fs::read("/path/to/cert.der").unwrap();
+//!     let der_cert = std::fs::read("/path/to/cert.der").expect("Failed to read DER certificate.");
 //!     let entry_args = EntryArgs::new(
 //!         "https", // scheme
 //!         "mtls.cert-demo.com", // ascii_host
@@ -49,7 +49,7 @@
 use base64::prelude::*;
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::fs::OpenOptions;
-use std::io::{Seek, SeekFrom, Write};
+use std::io::{Error, ErrorKind::InvalidInput, Result, Seek, SeekFrom, Write};
 use std::path::PathBuf;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use x509_parser::{nom::AsBytes, prelude::*};
@@ -62,7 +62,7 @@ pub struct EntryArgs<'a> {
     ascii_host: &'a [u8],
     /// port; for example: Some(8443.to_string())
     port: Option<String>,
-    /// Base domain; for example: "example.com".
+    /// Base domain; for example (assuming `ascii_host` is `my.example.com`): "example.com".
     base_domain: &'a [u8],
     /// X509 certificate to associate for mTLS with the above host.
     cert: X509Certificate<'a>,
@@ -87,7 +87,7 @@ impl<'a> EntryArgs<'a> {
         port: u32,
         base_domain: &'a str,
         der_cert: &'a [u8],
-    ) -> Self {
+    ) -> Result<Self> {
         // DER is very simple to parse; we've got a composition of:
         // * tags that distinguish types
         // * data length
@@ -100,32 +100,32 @@ impl<'a> EntryArgs<'a> {
         let res = X509Certificate::from_der(der_cert);
 
         match res {
-            Ok((_rem, cert)) => EntryArgs {
+            Ok((_rem, cert)) => Ok(EntryArgs {
                 scheme: scheme.as_bytes(),
                 ascii_host: ascii_host.as_bytes(),
                 port: match port {
-                    // Firefox will default to 443 for https and 80 for http
+                    // Firefox will default to 443 for https and 80 for http:
                     80 | 443 => None,
                     p => Some(p.to_string()),
                 },
                 base_domain: base_domain.as_bytes(),
                 cert,
-            },
-            _ => panic!("x509 parsing failed: {:?}", res),
+            }),
+            _ => Err(Error::new(
+                InvalidInput,
+                format!("x509 parsing failed: {:?}", res),
+            )),
         }
     }
 }
 
 /// Write a single ClientAuthRememberList *Entry* value to the given PathBuf.
-pub fn write_entry(entry_args: EntryArgs, backing_path: PathBuf) -> Result<(), std::io::Error> {
+pub fn write_entry(entry_args: EntryArgs, backing_path: PathBuf) -> Result<()> {
     write_entries(vec![entry_args], backing_path)
 }
 
 /// Write *multiple* ClientAuthRememberList *Entry* values to the given PathBuf.
-pub fn write_entries(
-    entry_inputs: Vec<EntryArgs>,
-    backing_path: PathBuf,
-) -> Result<(), std::io::Error> {
+pub fn write_entries(entry_inputs: Vec<EntryArgs>, backing_path: PathBuf) -> Result<()> {
     // NB: majority of this code was copied from Gecko source security/manager/ssl/data_storage/src/lib.rs.
 
     const KEY_LENGTH: usize = 256;
@@ -234,7 +234,7 @@ fn now_in_days() -> u16 {
 }
 
 // We are assuming the usecase here to be mTLS, thus the `partitionKey=` treatment.
-fn get_entry_key(entry_input: &EntryArgs) -> Result<Vec<u8>, std::io::Error> {
+fn get_entry_key(entry_input: &EntryArgs) -> Result<Vec<u8>> {
     const COMMA_COMMA_CARET: &[u8] = b",,^";
     const PARTITION_KEY_EQUALS: &[u8] = b"partitionKey=";
     const PERCENT_ENCODED_LEFT_PAREN: &[u8] = b"%28";
@@ -273,7 +273,7 @@ fn get_entry_key(entry_input: &EntryArgs) -> Result<Vec<u8>, std::io::Error> {
 }
 
 // "dbkey" is the "entry value", which is effectively the meat of the slot's value.
-fn get_dbkey(entry_input: &EntryArgs) -> Result<Vec<u8>, std::io::Error> {
+fn get_dbkey(entry_input: &EntryArgs) -> Result<Vec<u8>> {
     let serial_bytes = entry_input.cert.raw_serial();
     let serial_bytes_len = serial_bytes.len();
 

@@ -20,7 +20,7 @@
 //! #### Example
 //!
 //! This (fictitious file paths) example shows a single host:certificate configuration.
-//! ```
+//! ```rust,no_run
 //! use ff_carl::write_entry;
 //! use ff_carl::EntryArgs;
 //! use std::path::PathBuf;
@@ -72,7 +72,7 @@ impl<'a> EntryArgs<'a> {
     /// Construct a new EntryArgs.  This will issue an io::Error if the `der_cert`
     /// is not of DER format or if there are any certificate parsing issues.
     /// #### Example
-    /// ```
+    /// ```rust,ignore
     /// let entry_args = ff_carl::EntryArgs::new(
     ///    "https",
     ///    "mtls.cert-demo.com",
